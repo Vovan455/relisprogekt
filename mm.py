@@ -1,11 +1,12 @@
 import pygame
+import time
+
 
 
 WIDTH = 1200
 HEIGHT = 650
 SIZE = (WIDTH, HEIGHT)
 FPS = 60
-
 
 window = pygame.display.set_mode(SIZE)
 background = pygame.transform.scale(
@@ -34,6 +35,7 @@ class GameSprite(pygame.sprite.Sprite):
 class Field(GameSprite):
     def __init__(self, filename, size, coords, speed):
         super().__init__(filename, size, coords, speed)
+        self.timer=5
         self.state = 1
     def update(self):
         if self.state<=len(filds_pix):     
@@ -55,7 +57,9 @@ game = True
 finish = False
 restart = False
 #____________________________________________________________________________________
-
+grow_state=3
+start_time = time.time()
+car_time=start_time
 while game:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -63,13 +67,26 @@ while game:
         if event.type == pygame.MOUSEBUTTONDOWN and event.button ==1:
             for f in filds:
                 if f.rect.collidepoint(event.pos):
-                    f.state+=1
-                    f.update()
+                    if f.state!=grow_state:
+                        f.state+=1
+                        f.update()
 
     if not finish and not restart:
         window.blit(background, (0,0))
+        new_time=time.time()
         for f in filds:
+            
             f.reset(window)
+        if round(new_time - car_time)>=1:
+            for f in filds:
+                if f.state==grow_state:
+                    f.timer-=1
+                    car_time=new_time
+                    print (f.timer,f.state)
+                    if f.timer<=0:
+                        f.state+=1 
+                        f.update()
+
 
 
     if restart:
